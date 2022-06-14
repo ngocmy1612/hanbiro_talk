@@ -1,6 +1,4 @@
-import re, sys, json
-import time, random#, testlink
-import openpyxl
+import re, sys, json, time, random, openpyxl, pathlib, os
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -11,16 +9,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException, WebDriverException
 from selenium.webdriver.support import expected_conditions as EC
 from random import choice
-import pathlib
 from pathlib import Path
-import os
 from sys import platform
 import MN_function
 
 chrome_options = webdriver.ChromeOptions()
-
-
-#result=open(os.path.dirname(Path(__file__).absolute())+'\\result.txt','w')
 
 class bcolors:
     HEADER = '\033[95m'
@@ -32,11 +25,8 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-#testcase_fail = bcolors.FAIL + ">>> Test case status: fail" + bcolors.ENDC
-#testcase_pass = bcolors.OKGREEN + ">>> Test case status: pass" + bcolors.ENDC
-
-#print(json_file)
 class objects:
+    n = random.randint(1,1000)
     now = datetime.now()
     year = now.strftime("%Y")
     month = now.strftime("%m")
@@ -140,17 +130,6 @@ def TestCase_LogResult(menu, sub_menu, testcase, status, description, tester):
     current_sheet.cell(row=start_row, column=7).value = tester
 
     wb.save(testcase_log)
-
-'''TESTLINK_API_PYTHON_SERVER_URL= 'http://qa1.hanbiro.net/testlink/lib/api/xmlrpc/v1/xmlrpc.php'
-TESTLINK_API_PYTHON_DEVKEY= 'e80ce28cbff80bd624cc2679c915596d'
-
-tls = testlink.TestLinkHelper(TESTLINK_API_PYTHON_SERVER_URL, TESTLINK_API_PYTHON_DEVKEY).connect(testlink.TestlinkAPIClient)
-
-def TestlinkResult_Pass(external_id):
-    tls.reportTCResult(testcaseexternalid=external_id, testplanid=7377, buildname="v3.8.46", status='p', notes='Test Case [' + external_id + '] passed')
-
-def TestlinkResult_Fail(external_id):
-    tls.reportTCResult(testcaseexternalid=external_id, testplanid=7377, buildname="v3.8.46", status='f', notes='Test Case [' + external_id + '] failed')'''
 
 def access_qa(domain):
     driver.get(domain)

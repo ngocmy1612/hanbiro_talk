@@ -1,7 +1,7 @@
-import time, sys, unittest, random, json
+import time, sys, unittest, random, json, os, pyperclip, framework_sample
 from datetime import datetime
 from selenium import webdriver
-from random import randint
+from random import randint, choice
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -11,45 +11,29 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.alert import Alert
-from random import choice
 from pathlib import Path
-import os
-import pyperclip
+from MN_functions import *
 from framework_sample import *
-
-from MN_functions import driver, data, ValidateFailResultAndSystem, Logging, TestCase_LogResult
-json_file = os.path.dirname(Path(__file__).absolute())+"\\MN_groupware_auto.json"
+current_path = os.path.dirname(Path(__file__).absolute())
+json_file = current_path + "\\MN_groupware_auto.json"
 
 # Start the web driver
-service = webdriver.chrome.service.Service("C:\\Users\\Ngoc\\Desktop\\ngoc_automationtest\\auto_hanbiro_talk\\chromedriver_talk.exe")
+service = webdriver.chrome.service.Service(current_path + "\\chromedriver_talk.exe")
 service.start()
 
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
-attachment = "C:\\Users\\Ngoc\\Desktop\\ngoc_automationtest\\auto_hanbiro_talk\\attachment\\background6.jpg"
-file_text = "C:\\Users\\Ngoc\\Desktop\\ngoc_automationtest\\auto_hanbiro_talk\\attachment\\file_text.txt"
-
-n = random.randint(1,1000)
-now = datetime.now()
-date = now.strftime("%m/%d/%y %H:%M:%S")
-
+#data
+attachment = current_path + "background6.jpg"
+file_text = current_path + "file_text.txt"
 dept_org = "Selenium"    
 contact_org = "AutomationTest"
+password_talk = "automationtest1!"
 forward_name = "AutomationTest2"
 add_user = "AutomationTest"
-chat_content = "This is content chat, date: " + date
-quote_chat = "This is quote content: " + date
-content_whisper = "This is message of whisper, date: " + date
-content_board = "This is content of Board: " + date
-content_edit = "Edit content Board: " + date
+chat_content = "Hanbiro test " + objects.date_time
+quote_chat = "This is quote content: " + objects.date_time
+content_whisper = "This is message of whisper, date: " + objects.date_time
+content_board = "This is content of Board: " + objects.date_time
+content_edit = "Edit content Board: " + objects.date_time
 
 # start the app
 driver = webdriver.remote.webdriver.WebDriver(
@@ -68,8 +52,8 @@ driver = webdriver.remote.webdriver.WebDriver(
     keep_alive=False)
 
 def login():
-    #login
-    Waits.Wait20s_ElementLoaded("//input[@id='domain']")
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//input[@id='domain']")))
+
     domain = driver.find_element_by_xpath("//input[@id='domain']")
     if bool(domain.get_attribute("value")) == True:
         domain.clear()
@@ -83,9 +67,9 @@ def login():
     if bool(user_id.get_attribute("value")) == True:
         user_id.clear()
         time.sleep(1)
-    user_id.send_keys("automationtest")
+    user_id.send_keys(contact_org.lower())
     time.sleep(1)
-    Commands.InputElement("//input[@id='password']", "automationtest1!")
+    driver.find_element_by_xpath("//input[@id='password']").send_keys(password_talk)
     time.sleep(1)
     driver.find_element_by_xpath("//span[text()='Sign In']").click()
     try:
@@ -95,9 +79,53 @@ def login():
     except:
         print(bcolors.OKGREEN + "=> Login fail" + bcolors.ENDC)
         TestCase_LogResult(**data["testcase_result"]["talk2"]["login"]["fail"])
-    
+
+def get_newest_mess():
+    newest_mess = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[@aria-label='grid']/div/div[1]//p/span")
+    newest_mess_content= newest_mess.text
+    newest_mess.click()
+    print("- Get newest mess")
+    time.sleep(8)
+    get_text = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div[contains(.,'"+ str(newest_mess_content) +"')]")
+    if get_text.is_displayed():
+        print("=> Newest mess correct content")
+
 def message():
     #access message tab
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH,"//ul[contains(@class,'MuiList-padding')]//div[contains(@aria-label,'Room list')]"))).click()
+    time.sleep(5)
+    try:
+        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//div[@class='simplebar-content']//div[@aria-label='grid']//button[@class='MuiButtonBase-root']")))
+        print("=> Access messenger tab")
+        get_newest_mess()
+    except:
+        print("=> Cannot access messenger tab")
+        pass
+
+    try:
+        searchuser()
+    except:
+        pass
+
+def searchuser():
+    driver.find_element_by_xpath("//ul[contains(@class,'MuiList-padding')]//div[1]").click()
+    print("- Access ORG")
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//div[@class='simplebar-content']//div[@aria-label='grid']/div/div")))
+    time.sleep(3)
+    search_contact = driver.find_element_by_xpath("//*[@id='root']//div[contains(@class,'MuiInputBase-root')]/input[contains(@class,'MuiInputBase-input')]")
+    search_contact.send_keys(contact_org)
+    search_contact.send_keys(Keys.ENTER)
+    time.sleep(2)
+    print("- Search myself")
+    try:
+        contact_search = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//*[@class='simplebar-mask']//div[@class='simplebar-content']//span[contains(.,'Contacts')]/following-sibling::div//div[contains(.,'"+ str(contact_org) +"')]")))
+        contact_search.click()
+        print("=> Search user success")
+        send_mess()
+    except:
+        print("=> search user fail")
+
+def send_mess():
     access_page_chat = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//div[@id='hanbiro_message_list_chat_input']")))
     time.sleep(2)
     
@@ -130,11 +158,11 @@ def write_content():
     driver.find_element_by_xpath("//*[@id='hanbiro_message_list_chat_input']//button[2]").click()
     print("- Attach file Clouddisk")
     attach_clouddisk()
-
+    ####################################################################################### ATTACH PC fail
     #attach PC
     attach_file = driver.find_element_by_xpath("//*[@id='hanbiro_message_list_chat_input']//div[2]/input")
     attach_file.send_keys(attachment)
-    print(bcolors.OKGREEN + "- Attach file" + bcolors.ENDC)
+    print(bcolors.OKGREEN + "- Attach file PC" + bcolors.ENDC)
     time.sleep(5)
 
 def attach_clouddisk():
@@ -249,5 +277,5 @@ def send_whisper():
 
 login()
 message()
-whisper()
+#whisper()
 

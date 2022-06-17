@@ -22,18 +22,13 @@ service = webdriver.chrome.service.Service(current_path + "\\chromedriver_talk.e
 service.start()
 
 #data
-attachment = current_path + "background6.jpg"
-file_text = current_path + "file_text.txt"
-dept_org = "Selenium"    
+attachment = current_path + "\\attachment\\background6.jpg"
+file_text = current_path + "\\attachment\\file_text.txt"
+user_name = "automationtest"
+password_talk = "AutomationTest1!"
 contact_org = "AutomationTest"
-password_talk = "automationtest1!"
-forward_name = "AutomationTest2"
-add_user = "AutomationTest"
-chat_content = "Hanbiro test " + objects.date_time
-quote_chat = "This is quote content: " + objects.date_time
-content_whisper = "This is message of whisper, date: " + objects.date_time
-content_board = "This is content of Board: " + objects.date_time
-content_edit = "Edit content Board: " + objects.date_time
+chat_content = "Hanbiro test messenger" + objects.date_time
+content_whisper = "Hanbiro test whisper " + objects.date_time
 
 # start the app
 driver = webdriver.remote.webdriver.WebDriver(
@@ -67,7 +62,7 @@ def login():
     if bool(user_id.get_attribute("value")) == True:
         user_id.clear()
         time.sleep(1)
-    user_id.send_keys(contact_org.lower())
+    user_id.send_keys(user_name)
     time.sleep(1)
     driver.find_element_by_xpath("//input[@id='password']").send_keys(password_talk)
     time.sleep(1)
@@ -81,11 +76,12 @@ def login():
         TestCase_LogResult(**data["testcase_result"]["talk2"]["login"]["fail"])
 
 def get_newest_mess():
+    # Tạo vòng lặp
     newest_mess = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[@aria-label='grid']/div/div[1]//p/span")
     newest_mess_content= newest_mess.text
     newest_mess.click()
     print("- Get newest mess")
-    time.sleep(8)
+    time.sleep(5)
     get_text = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div[contains(.,'"+ str(newest_mess_content) +"')]")
     if get_text.is_displayed():
         print("=> Newest mess correct content")
@@ -123,12 +119,12 @@ def searchuser():
         print("=> Search user success")
         send_mess()
     except:
-        print("=> search user fail")
+        print("=> Search user fail")
 
 def send_mess():
     access_page_chat = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//div[@id='hanbiro_message_list_chat_input']")))
     time.sleep(2)
-    
+
     if access_page_chat.is_displayed():
         print(bcolors.OKGREEN + ">> Access page chat success" + bcolors.ENDC)
         TestCase_LogResult(**data["testcase_result"]["talk2"]["access_message_page"]["pass"])
@@ -136,7 +132,16 @@ def send_mess():
             write_content()
         except:
             pass   
-        search_user_in_mess()        
+
+        try:
+            srcoll_mess()
+        except:
+            pass
+
+        try:
+            search_user_in_mess()
+        except:
+            pass    
     else:
         print(bcolors.OKGREEN + ">> Access page chat fail" + bcolors.ENDC)
         TestCase_LogResult(**data["testcase_result"]["talk2"]["access_message_page"]["fail"])
@@ -158,7 +163,8 @@ def write_content():
     driver.find_element_by_xpath("//*[@id='hanbiro_message_list_chat_input']//button[2]").click()
     print("- Attach file Clouddisk")
     attach_clouddisk()
-    ####################################################################################### ATTACH PC fail
+    time.sleep(3)
+
     #attach PC
     attach_file = driver.find_element_by_xpath("//*[@id='hanbiro_message_list_chat_input']//div[2]/input")
     attach_file.send_keys(attachment)
@@ -182,7 +188,20 @@ def attach_clouddisk():
             time.sleep(2)
         driver.find_element_by_xpath("//button/span[text()='SEND']").click()
         print("=> Send attach file clouddisk")
-        
+
+def srcoll_mess():
+    count_list = int(len(driver.find_elements_by_xpath("//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div")))
+    scroll_newmess = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[1]")))
+    ActionChains(driver).move_to_element(scroll_newmess).release().perform()
+    print(bcolors.OKGREEN + "scroll success" + bcolors.ENDC)
+    time.sleep(2)
+    coutn_list1 = int(len(driver.find_elements_by_xpath("//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div")))
+
+    if coutn_list1 < count_list:
+        print("=> Scroll up to view older messages fail")
+    else:
+        print("=> Scroll up to view older messages success")
+
 def attach_clouddisk_whisper():
     WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, "//div[contains(@class,'MuiDialog-paperScrollPaper')]//div[contains(@class,'Pane1')]//div[@class='MuiListItemText-root']")))
     time.sleep(2)

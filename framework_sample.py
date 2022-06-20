@@ -5,8 +5,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait, Select
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import WebDriverException
-from MN_functions import driver, bcolors
+from MN_functions import *
+
 
 def PrintYellow(msg):
     '''• Usage: Color msg in yellow'''
@@ -122,10 +125,13 @@ class Commands():
 
         return element
 
+    def InputElementtest(xpath, value):
+        driver.find_element_by_xpath(xpath).send_keys(value)
+
     def InputElement(xpath, value):
         '''• Usage: Send key value in input box
                 return WebElement'''
-
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, xpath)))
         element = driver.find_element_by_xpath(xpath)
         element.send_keys(value)
 

@@ -458,6 +458,47 @@
         
     },
 
+    "talk":{
+        "domain": "//input[@id='domain']",
+        "talk_id": "//input[@id='userid']",
+        "password_talk": "//input[@id='password']",
+        "sign_in": "//span[text()='Sign In']",
+        "access_page": "//div[@id='root']//ul/div",
+        "room_list": "//ul[contains(@class,'MuiList-padding')]//div[contains(@aria-label,'Room list')]",
+        "message_tab": "//div[@class='simplebar-content']//div[@aria-label='grid']//button[@class='MuiButtonBase-root']",
+        "org": "//ul[contains(@class,'MuiList-padding')]//div[1]",
+        "mess_page": "//div[@class='simplebar-content']//div[@aria-label='grid']/div/div",
+        "search_contact": "//*[@id='root']//div[contains(@class,'MuiInputBase-root')]/input[contains(@class,'MuiInputBase-input')]",
+        "contact_search": "//*[@class='simplebar-mask']//div[@class='simplebar-content']//span[contains(.,'Contacts')]/following-sibling::div//div[contains(.,'",
+        "access_page_chat": "//div[@id='hanbiro_message_list_chat_input']",
+        "input_content": "//div[@id='textBox']",
+        "result_chat": "//*[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div//p[contains(text(),'",
+        "attach_clouddisk": "//*[@id='hanbiro_message_list_chat_input']//button[2]",
+        "attach_pc": "//*[@id='hanbiro_message_list_chat_input']//div[2]/input",
+        "clouddisk_page": "//div[contains(@class,'MuiDialog-paperScrollPaper')]//div[contains(@class,'Pane1')]//div[@class='MuiListItemText-root']",
+        "no_items": "//div[contains(@class,'MuiDialog-paperScrollPaper')]//div[contains(@class,'Pane2')]//div/p[contains(.,'No items')]",
+        "close_button": "//button/span[text()='Close']",
+        "count_file": "//div[contains(@class,'MuiDialog-paperScrollPaper')]//div[contains(@class,'Pane2')]//div[@class='simplebar-content']//div/div[@role='rowgroup']/div",
+        "file1": "//div[contains(@class,'MuiDialog-paperScrollPaper')]//div[contains(@class,'Pane2')]//div[@class='simplebar-content']//div[2]/div[contains(@class,'MuiListItem-button')]//span/input",
+        "file2": "//div[contains(@class,'MuiDialog-paperScrollPaper')]//div[contains(@class,'Pane2')]//div[@class='simplebar-content']//div[3]/div[contains(@class,'MuiListItem-button')]//span/input",
+        "send_file": [
+            "//button/span[text()='SEND']",
+            "//button/span[text()='Apply']"
+        ],
+        "count_list": "//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div",
+        "scroll_newmess": "//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[1]",
+        "search_user": "//ul[contains(@class,'MuiList-padding')]//div[3]",
+        "whisper": "//*[@class='simplebar-mask']//div[@class='simplebar-content']/div/div/div",
+        "send_whisper": "//div[contains(@class,'MuiPaper-rounded')]/ul[contains(@class,'MuiMenu-list')]//li//span[contains(.,'Send Whisper')]",
+        "write_whisper": "//div[contains(@class,'MuiDialog-container')]//div[@class='MuiDialogContent-root']//h6[contains(.,'Whisper Write')]",
+        "input_whisper": "//div[contains(@placeholder,'Enter a message')]",
+        "clouddisk_button": "//div[contains(@class,'MuiDialog-container')]//div[@class='MuiDialogContent-root']//h6[contains(.,'Whisper Write')]//following::input[2]/../following-sibling::button",
+        "attach_whisper": "//div[contains(@class,'MuiDialog-container')]//div[@class='MuiDialogContent-root']//h6[contains(.,'Whisper Write')]//following::input[2]",
+        "send_whis": "//div[contains(@class,'MuiDialog-container')]//h6[contains(.,'Whisper Write')]//following::button/span[contains(.,'SEND')]",
+        "close_whisper": "//div[contains(@class,'MuiDialog-container')]//h6[contains(.,'Whisper Write')]//following-sibling::button",
+        "access_whisper_page": "//ul[contains(@class,'MuiList-padding')]//div[4]"
+    },
+
     "testcase_result":{
         "circular":{
             "add_folder":{

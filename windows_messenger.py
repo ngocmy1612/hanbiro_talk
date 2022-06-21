@@ -1,4 +1,4 @@
-import time, sys, unittest, random, json, os, pyperclip
+import time, sys, unittest, random, json, os, pyperclip, openpyxl
 from datetime import datetime
 from selenium import webdriver
 from random import randint, choice
@@ -12,7 +12,83 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.alert import Alert
 from pathlib import Path
-from MN_functions import *
+
+current_path = os.path.dirname(Path(__file__).absolute())
+json_file = current_path + "\\MN_groupware_auto.json"
+with open(json_file) as json_file:
+        data = json.load(json_file)
+
+# Start the web driver
+service = webdriver.chrome.service.Service(current_path + "\\chromedriver_talk.exe")
+service.start()
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+class objects:
+    n = random.randint(1,1000)
+    now = datetime.now()
+    year = now.strftime("%Y")
+    month = now.strftime("%m")
+    day = now.strftime("%d")
+    time1 = now.strftime("%H:%M:%S")
+    date_time = now.strftime("%Y/%m/%d, %H:%M:%S")
+    date_id = date_time.replace("/", "").replace(", ", "").replace(":", "")[2:]
+    testcase_pass = "Test case status: pass"
+    testcase_fail = "Test case status: fail"
+    
+class functions():
+    chrome_options = webdriver.ChromeOptions()
+
+    log_testcase = "\\testcase_log\\"
+    testcase_log = current_path + log_testcase + "MN_testcase_result_" + str(objects.date_id) + ".xlsx"
+
+    logs = [testcase_log]
+    for log in logs:
+        if ".txt" in log:
+            open(log, "x").close()
+        else:
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.cell(row=1, column=1).value = "Menu"
+            ws.cell(row=1, column=2).value = "Sub-Menu"
+            ws.cell(row=1, column=3).value = "Test Case Name"
+            ws.cell(row=1, column=4).value = "Status"
+            ws.cell(row=1, column=5).value = "Description"
+            ws.cell(row=1, column=6).value = "Date"
+            ws.cell(row=1, column=7).value = "Tester"
+            wb.save(log)
+
+def TestCase_LogResult(menu, sub_menu, testcase, status, description, tester):
+
+    if status == "Pass":
+        print(objects.testcase_pass)
+    else:
+        print(objects.testcase_fail)
+    
+    wb = openpyxl.load_workbook(functions.testcase_log)
+    current_sheet = wb.active
+    start_row = len(list(current_sheet.rows)) + 1
+
+    current_sheet.cell(row=start_row, column=1).value = menu
+    current_sheet.cell(row=start_row, column=2).value = sub_menu
+    current_sheet.cell(row=start_row, column=3).value = testcase
+    current_sheet.cell(row=start_row, column=4).value = status
+    current_sheet.cell(row=start_row, column=5).value = description
+    current_sheet.cell(row=start_row, column=6).value = objects.date_time
+    current_sheet.cell(row=start_row, column=7).value = tester
+
+    wb.save(functions.testcase_log)
+
+def Logging(msg):
+    print(msg)
 
 def PrintYellow(msg):
     '''• Usage: Color msg in yellow'''
@@ -351,20 +427,12 @@ try:
 except:
     folder_execution = ""
 
-current_path = os.path.dirname(Path(__file__).absolute())
-json_file = current_path + "\\MN_groupware_auto.json"
-
-# Start the web driver
-service = webdriver.chrome.service.Service(current_path + "\\chromedriver_talk.exe")
-service.start()
-
 #data
 attachment = current_path + "\\attachment\\background6.jpg"
 file_text = current_path + "\\attachment\\file_text.txt"
-user_name = "automationtest"
 password_talk = "automationtest1!"
 contact_org = "AutomationTest"
-chat_content = "Hanbiro test messenger" + objects.date_time
+chat_content = "Hanbiro test messenger " + objects.date_time
 content_whisper = "Hanbiro test whisper " + objects.date_time
 
 # start the app
@@ -384,7 +452,7 @@ driver = webdriver.remote.webdriver.WebDriver(
     keep_alive=False)
 
 def login():
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["domain"])))
+    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH,data["talk"]["domain"])))
 
     domain = driver.find_element_by_xpath(data["talk"]["domain"])
     if bool(domain.get_attribute("value")) == True:
@@ -399,7 +467,7 @@ def login():
     if bool(user_id.get_attribute("value")) == True:
         user_id.clear()
         time.sleep(1)
-    user_id.send_keys(user_name)
+    user_id.send_keys(contact_org.lower())
     Commands.InputElement(data["talk"]["password_talk"], password_talk)
     time.sleep(1)
     driver.find_element_by_xpath(data["talk"]["sign_in"]).click()
@@ -472,12 +540,7 @@ def send_mess():
         try:
             srcoll_mess()
         except:
-            pass
-
-        try:
-            search_user_in_mess()
-        except:
-            pass    
+            pass 
     else:
         print(bcolors.OKGREEN + ">> Access page chat fail" + bcolors.ENDC)
         TestCase_LogResult(**data["testcase_result"]["talk2"]["access_message_page"]["fail"])
@@ -555,25 +618,6 @@ def attach_clouddisk_whisper():
             time.sleep(2)
         driver.find_element_by_xpath(data["talk"]["send_file"][1]).click()
         print("=> Send attach file clouddisk")
-
-def search_user_in_mess():
-    #Search user in message tab
-    driver.find_element_by_xpath(data["talk"]["search_user"]).click()
-    time.sleep(3)
-    search_contact = driver.find_element_by_xpath(data["talk"]["search_contact"])
-    search_contact.send_keys(contact_org)
-    search_contact.send_keys(Keys.ENTER)
-    print(bcolors.OKGREEN + "- Search User" + bcolors.ENDC)
-    time.sleep(2)
-
-    contact_search = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH,data["talk"]["contact_search"]+ str(contact_org) +"')]")))
-    if contact_search.is_displayed():
-        print(bcolors.OKGREEN + ">> Search contact success" + bcolors.ENDC)
-        contact_search.click()
-        TestCase_LogResult(**data["testcase_result"]["talk2"]["message_search"]["pass"])
-    else:
-        print(bcolors.OKGREEN + ">> Search contact fail" + bcolors.ENDC)
-        TestCase_LogResult(**data["testcase_result"]["talk2"]["message_search"]["fail"])
             
 def whisper():
     driver.find_element_by_xpath(data["talk"]["org"]).click()
@@ -632,5 +676,5 @@ def send_whisper():
 
 login()
 message()
-#whisper()
+whisper()
 

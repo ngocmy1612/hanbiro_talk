@@ -43,7 +43,7 @@ class objects:
     date_id = date_time.replace("/", "").replace(", ", "").replace(":", "")[2:]
     testcase_pass = "Test case status: pass"
     testcase_fail = "Test case status: fail"
-    
+
 class functions():
     chrome_options = webdriver.ChromeOptions()
 
@@ -513,7 +513,7 @@ def searchuser():
     WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["mess_page"])))
     time.sleep(3)
     search_contact = driver.find_element_by_xpath(data["talk"]["search_contact"])
-    search_contact.send_keys(contact_org)
+    search_contact.send_keys(contact_org.lower())
     search_contact.send_keys(Keys.ENTER)
     time.sleep(2)
     print("- Search myself")
@@ -625,7 +625,7 @@ def whisper():
     time.sleep(5)
 
     search_contact = driver.find_element_by_xpath(data["talk"]["search_contact"])
-    search_contact.send_keys(contact_org)
+    search_contact.send_keys(contact_org.lower())
     search_contact.send_keys(Keys.ENTER)
     time.sleep(2)
 
@@ -673,6 +673,11 @@ def send_whisper():
     print(bcolors.OKGREEN + "- Access Whisper page" + bcolors.ENDC)
     time.sleep(3)
 
+    try:
+        driver.find_element_by_xpath("//div[contains(@class,'Pane1')]//button[4]/span[1]")
+        Logging("=> Access whisper tab success")
+    except:
+        Logging("=> Access whisper tab fail")
 
 login()
 message()

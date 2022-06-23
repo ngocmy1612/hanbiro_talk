@@ -13,6 +13,11 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.alert import Alert
 from pathlib import Path
 
+try:
+    folder_execution = "C:\\Users\\Ngoc"
+except:
+    folder_execution = ""
+
 current_path = os.path.dirname(Path(__file__).absolute())
 json_file = current_path + "\\MN_groupware_auto.json"
 with open(json_file) as json_file:
@@ -21,16 +26,6 @@ with open(json_file) as json_file:
 # Start the web driver
 service = webdriver.chrome.service.Service(current_path + "\\chromedriver_talk.exe")
 service.start()
-
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
 
 class objects:
     n = random.randint(1,1000)
@@ -43,6 +38,40 @@ class objects:
     date_id = date_time.replace("/", "").replace(", ", "").replace(":", "")[2:]
     testcase_pass = "Test case status: pass"
     testcase_fail = "Test case status: fail"
+
+#data
+attachment = current_path + "\\attachment\\background6.jpg"
+file_text = current_path + "\\attachment\\file_text.txt"
+password_talk = "automationtest1!"
+contact_org = "AutomationTest"
+chat_content = "Hanbiro test messenger " + objects.date_time
+content_whisper = "Hanbiro test whisper " + objects.date_time
+
+# start the app
+driver = webdriver.remote.webdriver.WebDriver(
+    command_executor=service.service_url,
+    desired_capabilities={
+        'browserName': 'chrome',
+        'goog:chromeOptions': {
+            'args': ['develop_mode'],
+            'binary': '%s\\AppData\\Local\\Programs\\hanbiro-talk\\HanbiroTalk2.exe' % folder_execution,
+            'extensions': [],
+            'windowTypes': ['webview']},
+        'platform': 'ANY',
+        'version': ''},
+    browser_profile=None,
+    proxy=None,
+    keep_alive=False)
+    
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 class functions():
     chrome_options = webdriver.ChromeOptions()
@@ -166,6 +195,12 @@ class Waits():
         '''If page_xpath=None/False -> only check if the loading icon is not present'''
 
 class Commands():
+    def testcasepass(value):
+        TestCase_LogResult(**data["testcase_result"]["talk2"][value]["pass"])
+
+    def testcasefail(value):
+        TestCase_LogResult(**data["testcase_result"]["talk2"][value]["fail"])
+
     def FindElement(xpath):
         element = driver.find_element_by_xpath(xpath)
 
@@ -422,39 +457,8 @@ class Functions():
         except WebDriverException:
             return False
 
-try:
-    folder_execution = "C:\\Users\\Ngoc"
-except:
-    folder_execution = ""
-
-#data
-attachment = current_path + "\\attachment\\background6.jpg"
-file_text = current_path + "\\attachment\\file_text.txt"
-password_talk = "automationtest1!"
-contact_org = "AutomationTest"
-chat_content = "Hanbiro test messenger " + objects.date_time
-content_whisper = "Hanbiro test whisper " + objects.date_time
-
-# start the app
-driver = webdriver.remote.webdriver.WebDriver(
-    command_executor=service.service_url,
-    desired_capabilities={
-        'browserName': 'chrome',
-        'goog:chromeOptions': {
-            'args': ['develop_mode'],
-            'binary': '%s\\AppData\\Local\\Programs\\hanbiro-talk\\HanbiroTalk2.exe' % folder_execution,
-            'extensions': [],
-            'windowTypes': ['webview']},
-        'platform': 'ANY',
-        'version': ''},
-    browser_profile=None,
-    proxy=None,
-    keep_alive=False)
-
 def login():
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH,data["talk"]["domain"])))
-
-    domain = driver.find_element_by_xpath(data["talk"]["domain"])
+    domain = Waits.Wait20s_ElementLoaded(data["talk"]["domain"])
     if bool(domain.get_attribute("value")) == True:
         domain.clear()
         time.sleep(1)
@@ -470,17 +474,17 @@ def login():
     user_id.send_keys(contact_org.lower())
     Commands.InputElement(data["talk"]["password_talk"], password_talk)
     time.sleep(1)
-    driver.find_element_by_xpath(data["talk"]["sign_in"]).click()
+    Commands.ClickElement(data["talk"]["sign_in"])
     try:
-        access_page = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["access_page"])))
-        print(bcolors.OKGREEN + "=> Login success" + bcolors.ENDC)
-        TestCase_LogResult(**data["testcase_result"]["talk2"]["login"]["pass"])
+        access_page = Waits.Wait20s_ElementLoaded(data["talk"]["access_page"])
+        PrintGreen("=> Login success")
+        Commands.testcasepass("login")
     except:
-        print(bcolors.OKGREEN + "=> Login fail" + bcolors.ENDC)
-        TestCase_LogResult(**data["testcase_result"]["talk2"]["login"]["fail"])
+        PrintRed("=> Login fail")
+        Commands.testcasefail("login")
 
 def get_newest_mess():
-    # Tạo vòng lặp
+    # Tạo vòng lặp (chưa fix)
     newest_mess = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[@aria-label='grid']/div/div[1]//p/span")
     newest_mess_content= newest_mess.text
     newest_mess.click()
@@ -492,14 +496,16 @@ def get_newest_mess():
 
 def message():
     #access message tab
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["room_list"]))).click()
+    Commands.Wait10s_ClickElement(data["talk"]["room_list"])
     time.sleep(5)
     try:
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["message_tab"])))
-        print("=> Access messenger tab")
+        Waits.Wait20s_ElementLoaded(data["talk"]["message_tab"])
+        PrintGreen("=> Access messenger tab")
+        Commands.testcasepass("access_message_page")
         #get_newest_mess()
     except:
-        print("=> Cannot access messenger tab")
+        PrintRed("=> Cannot access messenger tab")
+        Commands.testcasefail("access_message_page")
         pass
 
     try:
@@ -508,30 +514,29 @@ def message():
         pass
 
 def searchuser():
-    driver.find_element_by_xpath(data["talk"]["org"]).click()
-    print("- Access ORG")
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["mess_page"])))
+    Commands.ClickElement(data["talk"]["org"])
+    PrintYellow("- Access ORG")
+    Waits.Wait20s_ElementLoaded(data["talk"]["mess_page"])
     time.sleep(3)
-    search_contact = driver.find_element_by_xpath(data["talk"]["search_contact"])
-    search_contact.send_keys(contact_org.lower())
-    search_contact.send_keys(Keys.ENTER)
+    Commands.InputEnterElement(data["talk"]["search_contact"], contact_org.lower())
     time.sleep(2)
-    print("- Search myself")
+    PrintYellow("- Search myself")
     try:
-        contact_search = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["contact_search"]+ str(contact_org) +"')]")))
-        contact_search.click()
-        print("=> Search user success")
+        Commands.ClickElement(data["talk"]["contact_search"]+ str(contact_org) +"')]")
+        PrintGreen("=> Search user success")
+        Commands.testcasepass("message_search")
         send_mess()
     except:
-        print("=> Search user fail")
+        PrintRed("=> Search user fail")
+        Commands.testcasefail("message_search")
 
 def send_mess():
-    access_page_chat = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["access_page_chat"])))
+    access_page_chat = Waits.Wait20s_ElementLoaded(data["talk"]["access_page_chat"])
     time.sleep(2)
 
     if access_page_chat.is_displayed():
-        print(bcolors.OKGREEN + ">> Access page chat success" + bcolors.ENDC)
-        TestCase_LogResult(**data["testcase_result"]["talk2"]["access_message_page"]["pass"])
+        PrintGreen(">> Access page chat success")
+        Commands.testcasepass("access_message_page")
         try:
             write_content()
         except:
@@ -542,142 +547,132 @@ def send_mess():
         except:
             pass 
     else:
-        print(bcolors.OKGREEN + ">> Access page chat fail" + bcolors.ENDC)
-        TestCase_LogResult(**data["testcase_result"]["talk2"]["access_message_page"]["fail"])
+        PrintRed(">> Access page chat fail")
+        Commands.testcasefail("access_message_page")
         pass
 
 def write_content():
     #send message: hanbiro test + current time (send to myself) / send with attachment
-    input_content = driver.find_element_by_xpath(data["talk"]["input_content"])
-    input_content.send_keys(chat_content)
-    input_content.send_keys(Keys.ENTER)
-    print(bcolors.OKGREEN + "- Input content chat" + bcolors.ENDC)
+    Commands.InputEnterElement(data["talk"]["input_content"], chat_content)
+    PrintYellow("- Input content chat")
 
-    result_chat = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["result_chat"] + str(chat_content) + "')]")))
-    print(bcolors.OKGREEN + ">> Send message success" + bcolors.ENDC)
-    TestCase_LogResult(**data["testcase_result"]["talk2"]["write_content"]["pass"])
+    result_chat = Waits.Wait20s_ElementLoaded(data["talk"]["result_chat"] + str(chat_content) + "')]")
+    PrintGreen(">> Send message success")
+    Commands.testcasepass("write_content")
 
     #attach clouddisk
     time.sleep(2)
-    driver.find_element_by_xpath(data["talk"]["attach_clouddisk"]).click()
-    print("- Attach file Clouddisk")
+    Commands.ClickElement(data["talk"]["attach_clouddisk"])
+    PrintYellow("- Attach file Clouddisk")
     attach_clouddisk()
     time.sleep(3)
 
     #attach PC
-    attach_file = driver.find_element_by_xpath(data["talk"]["attach_pc"])
-    attach_file.send_keys(attachment)
-    print(bcolors.OKGREEN + "- Attach file PC" + bcolors.ENDC)
+    Commands.InputElement(data["talk"]["attach_pc"], attachment)
+    PrintYellow("- Attach file PC")
     time.sleep(5)
 
 def attach_clouddisk():
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["clouddisk_page"])))
+    Waits.Wait20s_ElementLoaded(data["talk"]["clouddisk_page"])
     time.sleep(2)
     try:
         no_items = driver.find_element_by_xpath(data["talk"]["no_items"])
         if no_items.is_displayed():
-            print("=> No file in Clouddisk to attach")
-            driver.find_element_by_xpath(data["talk"]["close_button"]).click()
+            PrintYellow("=> No file in Clouddisk to attach")
+            Commands.ClickElement(data["talk"]["close_button"])
     except:
-        count_file = int(len(driver.find_elements_by_xpath(data["talk"]["count_file"])))
+        count_file = Functions.GetListLength(data["talk"]["count_file"])
         if count_file > 2:
-            driver.find_element_by_xpath(data["talk"]["file1"]).click()
-            driver.find_element_by_xpath(data["talk"]["file2"]).click()
-            print("=> Select file")
+            Commands.ClickElement(data["talk"]["file1"])
+            Commands.ClickElement(data["talk"]["file2"])
+            PrintYellow("- Select file")
             time.sleep(2)
-        driver.find_element_by_xpath(data["talk"]["send_file"][0]).click()
-        print("=> Send attach file clouddisk")
+        Commands.ClickElement(data["talk"]["send_file"][0])
+        PrintYellow("=> Send attach file clouddisk")
 
 def srcoll_mess():
-    count_list = int(len(driver.find_elements_by_xpath(data["talk"]["count_list"])))
-    scroll_newmess = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["scroll_newmess"])))
-    ActionChains(driver).move_to_element(scroll_newmess).release().perform()
-    print(bcolors.OKGREEN + "scroll success" + bcolors.ENDC)
+    count_list = Functions.GetListLength(data["talk"]["count_list"])
+    Commands.MoveToElement(data["talk"]["scroll_newmess"])
+    # scroll_newmess = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["scroll_newmess"])))
+    # ActionChains(driver).move_to_element(scroll_newmess).release().perform()
+    PrintYellow("- Scroll messenger")
     time.sleep(2)
-    coutn_list1 = int(len(driver.find_elements_by_xpath(data["talk"]["count_list"])))
+    coutn_list1 = Functions.GetListLength(data["talk"]["count_list"])
 
-    if coutn_list1 < count_list:
-        print("=> Scroll up to view older messages fail")
+    if coutn_list1 > count_list:
+        PrintGreen("=> Scroll up to view older messages success")
     else:
-        print("=> Scroll up to view older messages success")
+        PrintRed("=> Scroll up to view older messages fail")
 
 def attach_clouddisk_whisper():
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["clouddisk_page"])))
+    Waits.Wait20s_ElementLoaded(data["talk"]["clouddisk_page"])
     time.sleep(2)
     try:
         no_items = driver.find_element_by_xpath(data["talk"]["no_items"])
         if no_items.is_displayed():
-            print("=> No file in Clouddisk to attach")
-            driver.find_element_by_xpath(data["talk"]["close_button"]).click()
+            PrintYellow("=> No file in Clouddisk to attach")
+            Commands.ClickElement(data["talk"]["close_button"])
     except:
-        count_file = int(len(driver.find_elements_by_xpath(data["talk"]["count_file"])))
+        count_file = Functions.GetListLength(data["talk"]["count_file"])
         if count_file > 2:
-            driver.find_element_by_xpath(data["talk"]["file1"]).click()
-            driver.find_element_by_xpath(data["talk"]["file2"]).click()
-            print("=> Select file")
+            Commands.ClickElement(data["talk"]["file1"])
+            Commands.ClickElement(data["talk"]["file2"])
+            PrintYellow("- Select file")
             time.sleep(2)
-        driver.find_element_by_xpath(data["talk"]["send_file"][1]).click()
-        print("=> Send attach file clouddisk")
+        Commands.ClickElement(data["talk"]["send_file"][1])
+        PrintYellow("=> Send attach file clouddisk")
             
 def whisper():
-    driver.find_element_by_xpath(data["talk"]["org"]).click()
-    WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.XPATH, data["talk"]["whisper"])))
+    Commands.ClickElement(data["talk"]["org"])
+    Waits.Wait20s_ElementLoaded(data["talk"]["whisper"])
     time.sleep(5)
 
-    search_contact = driver.find_element_by_xpath(data["talk"]["search_contact"])
-    search_contact.send_keys(contact_org.lower())
-    search_contact.send_keys(Keys.ENTER)
+    Commands.InputEnterElement(data["talk"]["search_contact"], contact_org.lower())
     time.sleep(2)
 
-    contact_search = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["contact_search"]+ str(contact_org) +"')]")))
+    contact_search = Waits.Wait20s_ElementLoaded(data["talk"]["contact_search"]+ str(contact_org) +"')]")
     if contact_search.is_displayed():
-        print(bcolors.OKGREEN + ">> Search user success" + bcolors.ENDC)
+        PrintGreen(">> Search user success")
         time.sleep(3)
         actionChains = ActionChains(driver)
         actionChains.context_click(contact_search).perform()
-        print(bcolors.OKGREEN + "- Right click" + bcolors.ENDC)
+        PrintYellow("- Right click")
 
-        WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH,data["talk"]["send_whisper"]))).click()
+        Commands.Wait10s_ClickElement(data["talk"]["send_whisper"])
         time.sleep(3)
-        print(bcolors.OKGREEN + "- Send whisper" + bcolors.ENDC)
+        PrintYellow("- Send whisper")
         send_whisper()
-        TestCase_LogResult(**data["testcase_result"]["talk2"]["access_whisper_page"]["pass"])
     else:
-        print(bcolors.OKGREEN + ">> Search user fail" + bcolors.ENDC)
-        TestCase_LogResult(**data["testcase_result"]["talk2"]["access_whisper_page"]["fail"])
+        PrintRed(">> Search user fail")
 
 def send_whisper():
-    WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["write_whisper"])))
+    Waits.Wait20s_ElementLoaded(data["talk"]["write_whisper"])
     time.sleep(2)
 
-    input_whisper = driver.find_element_by_xpath(data["talk"]["input_whisper"])
-    input_whisper.send_keys(content_whisper)
-    time.sleep(3)
-    driver.find_element_by_xpath(data["talk"]["clouddisk_button"]).click()
-    print("- Attach file Clouddisk")
+    Commands.InputElement(data["talk"]["input_whisper"], content_whisper)
+    time.sleep(2)
+    Commands.Wait10s_ClickElement(data["talk"]["clouddisk_button"])
+    PrintYellow("- Attach file Clouddisk")
     attach_clouddisk_whisper()
     time.sleep(2)
 
-    attach_whisper = driver.find_element_by_xpath(data["talk"]["attach_whisper"])
-    attach_whisper.send_keys(file_text)
-    print(bcolors.OKGREEN + "- Attach file whisper" + bcolors.ENDC)
+    Commands.InputElement(data["talk"]["attach_whisper"], file_text)
+    PrintYellow("- Attach file whisper")
+    Commands.Wait10s_ClickElement(data["talk"]["send_whis"])
+    PrintYellow("- Send whisper")
+    Commands.Wait10s_ClickElement(data["talk"]["close_whisper"])
+    PrintYellow("- Close pop up write whisper")
+    Commands.Wait10s_ClickElement(data["talk"]["access_whisper_page"])
+    PrintYellow("- Access Whisper page")
     time.sleep(2)
-    driver.find_element_by_xpath(data["talk"]["send_whis"]).click()
-    print(bcolors.OKGREEN + "- Send whisper" + bcolors.ENDC)
-    time.sleep(5)
-    driver.find_element_by_xpath(data["talk"]["close_whisper"]).click()
-    print(bcolors.OKGREEN + "- Close pop up write whisper" + bcolors.ENDC)
-    time.sleep(3)
-
-    driver.find_element_by_xpath(data["talk"]["access_whisper_page"]).click()
-    print(bcolors.OKGREEN + "- Access Whisper page" + bcolors.ENDC)
-    time.sleep(3)
 
     try:
-        driver.find_element_by_xpath("//div[contains(@class,'Pane1')]//button[4]/span[1]")
-        Logging("=> Access whisper tab success")
+        driver.find_element_by_xpath(data["talk"]["whisper_page"])
+        PrintGreen("=> Access whisper tab success")
+        Commands.testcasepass("access_whisper_page")
     except:
-        Logging("=> Access whisper tab fail")
+        PrintRed("=> Access whisper tab fail")
+        Commands.testcasefail("access_whisper_page")
 
 login()
 message()

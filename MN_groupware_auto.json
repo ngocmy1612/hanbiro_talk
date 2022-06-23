@@ -496,7 +496,8 @@
         "attach_whisper": "//div[contains(@class,'MuiDialog-container')]//div[@class='MuiDialogContent-root']//h6[contains(.,'Whisper Write')]//following::input[2]",
         "send_whis": "//div[contains(@class,'MuiDialog-container')]//h6[contains(.,'Whisper Write')]//following::button/span[contains(.,'SEND')]",
         "close_whisper": "//div[contains(@class,'MuiDialog-container')]//h6[contains(.,'Whisper Write')]//following-sibling::button",
-        "access_whisper_page": "//ul[contains(@class,'MuiList-padding')]//div[4]"
+        "access_whisper_page": "//ul[contains(@class,'MuiList-padding')]//div[4]",
+        "whisper_page": "//div[contains(@class,'Pane1')]//button[4]/span[1]"
     },
 
     "testcase_result":{

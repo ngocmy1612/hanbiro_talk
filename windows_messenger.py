@@ -1,4 +1,5 @@
 import time, sys, unittest, random, json, os, pyperclip, openpyxl
+from tracemalloc import stop
 from datetime import datetime
 from selenium import webdriver
 from random import randint, choice
@@ -485,33 +486,72 @@ def login():
 
 def get_newest_mess():
     # Tạo vòng lặp (chưa fix)
+    list_mess = int(len(driver.find_elements_by_xpath("//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')]")
+    ))
+    print(list_mess)
+    i = 0
+    for i in range(list_mess):
+        i += 1
+        try:
+            ngoc = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')]["+ str(i) +"]//button/div/img")
+            print(i)
+            if ngoc.is_displayed():
+                newest_mess = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[@aria-label='grid']/div/div["+ str(i) +"]//p/span")
+                newest_mess_content = newest_mess.text
+                PrintRed(newest_mess_content)
+                newest_mess.click()
+                try:
+                    text_mess = driver.find_element_by_xpath("//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div/span/p")
+                    if text_mess.is_displayed():
+                        get_text = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div[contains(.,'"+ str(newest_mess_content) +"')]")
+                        if get_text.is_displayed():
+                            print("=> Newest mess correct content")
+                except:
+
+            break
+        except:
+            continue
+
+
+
+
+
+
+#//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')][3]//button/div/img
+
+
+
+
+def get_text():
     newest_mess = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[@aria-label='grid']/div/div[1]//p/span")
-    newest_mess_content= newest_mess.text
-    newest_mess.click()
-    print("- Get newest mess")
-    time.sleep(5)
-    get_text = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div[contains(.,'"+ str(newest_mess_content) +"')]")
-    if get_text.is_displayed():
-        print("=> Newest mess correct content")
+    newest_mess_content = newest_mess.text
+    PrintRed(newest_mess_content)
+    # newest_mess.click()
+    # print("- Get newest mess")
+    # time.sleep(5)
+    # get_text = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div[contains(.,'"+ str(newest_mess_content) +"')]")
+    # if get_text.is_displayed():
+    #     print("=> Newest mess correct content")
 
 def message():
     #access message tab
     Commands.Wait10s_ClickElement(data["talk"]["room_list"])
     time.sleep(5)
-    try:
-        Waits.Wait20s_ElementLoaded(data["talk"]["message_tab"])
-        PrintGreen("=> Access messenger tab")
-        Commands.testcasepass("access_message_page")
-        #get_newest_mess()
-    except:
-        PrintRed("=> Cannot access messenger tab")
-        Commands.testcasefail("access_message_page")
-        pass
+    get_newest_mess()
+    # try:
+    #     Waits.Wait20s_ElementLoaded(data["talk"]["message_tab"])
+    #     PrintGreen("=> Access messenger tab")
+    #     Commands.testcasepass("access_message_page")
+    #     #get_newest_mess()
+    # except:
+    #     PrintRed("=> Cannot access messenger tab")
+    #     Commands.testcasefail("access_message_page")
+    #     pass
 
-    try:
-        searchuser()
-    except:
-        pass
+    # try:
+    #     searchuser()
+    # except:
+    #     pass
 
 def searchuser():
     Commands.ClickElement(data["talk"]["org"])
@@ -676,5 +716,5 @@ def send_whisper():
 
 login()
 message()
-whisper()
+#whisper()
 

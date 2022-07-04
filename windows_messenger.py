@@ -495,21 +495,31 @@ def get_newest_mess():
         try:
             ngoc = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')]["+ str(i) +"]//button/div/img")
             print(i)
-            if ngoc.is_displayed():
-                newest_mess = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[@aria-label='grid']/div/div["+ str(i) +"]//p/span")
-                newest_mess_content = newest_mess.text
-                PrintRed(newest_mess_content)
-                newest_mess.click()
-                try:
-                    text_mess = driver.find_element_by_xpath("//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div/span/p")
-                    if text_mess.is_displayed():
-                        get_text = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div[contains(.,'"+ str(newest_mess_content) +"')]")
-                        if get_text.is_displayed():
-                            print("=> Newest mess correct content")
-                except:
+            print("- only user")
+            newest_mess = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[@aria-label='grid']/div/div["+ str(i) +"]//p/span")
+            newest_mess_content = newest_mess.text
+            PrintRed(newest_mess_content)
+            list_file = [".jpg", ".jpeg", ".png"]
+            PrintRed("lisst file")
+            for file in list_file:
+                PrintRed(file)
+                if file in newest_mess_content:
+                    PrintRed("file is img")
+                    break
+    
 
-            break
+            # newest_mess.click()
+            # try:
+            #     text_mess = driver.find_element_by_xpath("//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div/span/p")
+            #     if text_mess.is_displayed():
+            #         get_text = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div[contains(.,'"+ str(newest_mess_content) +"')]")
+            #         if get_text.is_displayed():
+            #             print("=> Newest mess correct content")
+            # except:
+
         except:
+            print("- it is group")
+
             continue
 
 
@@ -617,9 +627,8 @@ def attach_clouddisk():
     time.sleep(2)
     try:
         no_items = driver.find_element_by_xpath(data["talk"]["no_items"])
-        if no_items.is_displayed():
-            PrintYellow("=> No file in Clouddisk to attach")
-            Commands.ClickElement(data["talk"]["close_button"])
+        PrintYellow("=> No file in Clouddisk to attach")
+        Commands.ClickElement(data["talk"]["close_button"])
     except:
         count_file = Functions.GetListLength(data["talk"]["count_file"])
         if count_file > 2:

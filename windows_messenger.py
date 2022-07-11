@@ -485,78 +485,61 @@ def login():
         Commands.testcasefail("login")
 
 def get_newest_mess():
-    # Tạo vòng lặp (chưa fix)
-    list_mess = int(len(driver.find_elements_by_xpath("//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')]")
-    ))
-    print(list_mess)
-    i = 0
-    for i in range(list_mess):
-        i += 1
-        try:
-            ngoc = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')]["+ str(i) +"]//button/div/img")
-            print(i)
-            print("- only user")
-            newest_mess = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[@aria-label='grid']/div/div["+ str(i) +"]//p/span")
-            newest_mess_content = newest_mess.text
-            PrintRed(newest_mess_content)
-            list_file = [".jpg", ".jpeg", ".png"]
-            PrintRed("lisst file")
-            for file in list_file:
-                PrintRed(file)
-                if file in newest_mess_content:
-                    PrintRed("file is img")
-                    break
-    
+    # Tạo vòng lặp (chưa fix) #### define if list mess is empty
+    list_mess = Functions.GetListLength(data["talk"]["list_mess"])
 
-            # newest_mess.click()
-            # try:
-            #     text_mess = driver.find_element_by_xpath("//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div/span/p")
-            #     if text_mess.is_displayed():
-            #         get_text = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div[contains(.,'"+ str(newest_mess_content) +"')]")
-            #         if get_text.is_displayed():
-            #             print("=> Newest mess correct content")
-            # except:
+    if list_mess == 0:
+        PrintYellow("=> List messenger empty")
+    else:
+        msg_list = []
+        i = 0
+        for i in range(list_mess):
+            i += 1
+            talk_msg = Functions.GetElementText(data["talk"]["talk_msg"] % str(i))
+            msg_list.append(talk_msg)
+            
+        list_file = ["jpg", "jpeg", "png"]
+        msg_text_list = []
+        for msg in msg_list:
+            split_smg = msg.split(".")[-1]
+            if split_smg in list_file:
+                PrintYellow(">>> Msg is image -> cannot define")
+            elif msg == "[EMOTICON]":
+                PrintYellow(">>> Msg is emoticon -> cannot define")
+            else:
+                PrintYellow(">>> Msg is text")
+                msg_text_list.append(msg)
 
-        except:
-            print("- it is group")
+        for target_msg in msg_text_list:
+            target_position = msg_list.index(target_msg) + 1
+            try:
+                Commands.ClickElement(data["talk"]["talk_user"] % str(target_position))
+                PrintYellow("- Talk user")
+                newest_content = Functions.GetElementText(data["talk"]["newest_mess_content"] % str(target_position))
+                time.sleep(3)
+                try:
+                    Commands.FindElement(data["talk"]["newest_mess"] % str(newest_content))
+                    PrintGreen("=> Newest mess correct content")
+                except WebDriverException:
+                    PrintRed("=> Newest mess wrong content")
 
-            continue
-
-
-
-
-
-
-#//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')][3]//button/div/img
-
-
-
-
-def get_text():
-    newest_mess = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[@aria-label='grid']/div/div[1]//p/span")
-    newest_mess_content = newest_mess.text
-    PrintRed(newest_mess_content)
-    # newest_mess.click()
-    # print("- Get newest mess")
-    # time.sleep(5)
-    # get_text = driver.find_element_by_xpath("//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div[contains(.,'"+ str(newest_mess_content) +"')]")
-    # if get_text.is_displayed():
-    #     print("=> Newest mess correct content")
+                break
+            except WebDriverException:
+                PrintYellow("- Talk room")
 
 def message():
     #access message tab
     Commands.Wait10s_ClickElement(data["talk"]["room_list"])
     time.sleep(5)
-    get_newest_mess()
-    # try:
-    #     Waits.Wait20s_ElementLoaded(data["talk"]["message_tab"])
-    #     PrintGreen("=> Access messenger tab")
-    #     Commands.testcasepass("access_message_page")
-    #     #get_newest_mess()
-    # except:
-    #     PrintRed("=> Cannot access messenger tab")
-    #     Commands.testcasefail("access_message_page")
-    #     pass
+    try:
+        Waits.Wait20s_ElementLoaded(data["talk"]["message_tab"])
+        PrintGreen("=> Access messenger tab")
+        Commands.testcasepass("access_message_page")
+        get_newest_mess()
+    except:
+        PrintRed("=> Cannot access messenger tab")
+        Commands.testcasefail("access_message_page")
+        pass
 
     # try:
     #     searchuser()

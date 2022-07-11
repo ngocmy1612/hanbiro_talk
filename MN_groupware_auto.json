@@ -485,6 +485,11 @@
             "//button/span[text()='SEND']",
             "//button/span[text()='Apply']"
         ],
+        "list_mess": "//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')]",
+        "talk_msg": "//div[@class='simplebar-content']//div[@aria-label='grid']/div/div[%s]//p/span",
+        "talk_user": "//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')][%s]//button/div/img",
+        "newest_mess_content": "//div[@class='simplebar-content']//div[@aria-label='grid']/div/div[%s]//p/span",
+        "newest_mess": "//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[last()]//div/div[contains(.,'%s')]",
         "count_list": "//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div",
         "scroll_newmess": "//div[@id='hanbiro_message_list_container']//div[@class='simplebar-content']//div[contains(@class,'hanbiroToFadeInAndOut')]/div[1]",
         "search_user": "//ul[contains(@class,'MuiList-padding')]//div[3]",

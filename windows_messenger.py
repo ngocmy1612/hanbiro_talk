@@ -43,8 +43,9 @@ class objects:
 #data
 attachment = current_path + "\\attachment\\background6.jpg"
 file_text = current_path + "\\attachment\\file_text.txt"
+domain_execution = "myngoc.hanbiro.net"
+contact_org = "automationtest1"
 password_talk = "automationtest1!"
-contact_org = "AutomationTest"
 chat_content = "Hanbiro test messenger " + objects.date_time
 content_whisper = "Hanbiro test whisper " + objects.date_time
 
@@ -464,7 +465,7 @@ def login():
         domain.clear()
         time.sleep(1)
     
-    domain.send_keys("myngoc.hanbiro.net")
+    domain.send_keys(domain_execution)
 
     time.sleep(1)
 
@@ -472,12 +473,12 @@ def login():
     if bool(user_id.get_attribute("value")) == True:
         user_id.clear()
         time.sleep(1)
-    user_id.send_keys(contact_org.lower())
+    user_id.send_keys(contact_org)
     Commands.InputElement(data["talk"]["password_talk"], password_talk)
     time.sleep(1)
     Commands.ClickElement(data["talk"]["sign_in"])
     try:
-        access_page = Waits.Wait20s_ElementLoaded(data["talk"]["access_page"])
+        Waits.Wait20s_ElementLoaded(data["talk"]["access_page"])
         PrintGreen("=> Login success")
         Commands.testcasepass("login")
     except:
@@ -485,7 +486,6 @@ def login():
         Commands.testcasefail("login")
 
 def get_newest_mess():
-    # Tạo vòng lặp (chưa fix) #### define if list mess is empty
     list_mess = Functions.GetListLength(data["talk"]["list_mess"])
 
     if list_mess == 0:
@@ -530,32 +530,34 @@ def get_newest_mess():
 def message():
     #access message tab
     Commands.Wait10s_ClickElement(data["talk"]["room_list"])
-    time.sleep(5)
+    time.sleep(3)
     try:
         Waits.Wait20s_ElementLoaded(data["talk"]["message_tab"])
         PrintGreen("=> Access messenger tab")
         Commands.testcasepass("access_message_page")
+        time.sleep(2)
         get_newest_mess()
     except:
         PrintRed("=> Cannot access messenger tab")
         Commands.testcasefail("access_message_page")
         pass
 
-    # try:
-    #     searchuser()
-    # except:
-    #     pass
+    try:
+        searchuser()
+    except:
+        pass
 
 def searchuser():
     Commands.ClickElement(data["talk"]["org"])
     PrintYellow("- Access ORG")
     Waits.Wait20s_ElementLoaded(data["talk"]["mess_page"])
     time.sleep(3)
-    Commands.InputEnterElement(data["talk"]["search_contact"], contact_org.lower())
+    Commands.InputEnterElement(data["talk"]["search_contact"], contact_org)
     time.sleep(2)
     PrintYellow("- Search myself")
+    Commands.ClickElement(data["talk"]["contact_search"])
     try:
-        Commands.ClickElement(data["talk"]["contact_search"]+ str(contact_org) +"')]")
+        Waits.Wait10s_ElementLoaded(data["talk"]["my_room"])
         PrintGreen("=> Search user success")
         Commands.testcasepass("message_search")
         send_mess()
@@ -564,35 +566,25 @@ def searchuser():
         Commands.testcasefail("message_search")
 
 def send_mess():
-    access_page_chat = Waits.Wait20s_ElementLoaded(data["talk"]["access_page_chat"])
-    time.sleep(2)
-
-    if access_page_chat.is_displayed():
+    try:
+        Waits.Wait20s_ElementLoaded(data["talk"]["access_page_chat"])
+        time.sleep(2)
         PrintGreen(">> Access page chat success")
         Commands.testcasepass("access_message_page")
         try:
             write_content()
         except:
             pass   
-
-        try:
-            srcoll_mess()
-        except:
-            pass 
-    else:
+        srcoll_mess()
+        # try:
+        #     srcoll_mess()
+        # except:
+        #     pass 
+    except WebDriverException:
         PrintRed(">> Access page chat fail")
         Commands.testcasefail("access_message_page")
-        pass
 
 def write_content():
-    #send message: hanbiro test + current time (send to myself) / send with attachment
-    Commands.InputEnterElement(data["talk"]["input_content"], chat_content)
-    PrintYellow("- Input content chat")
-
-    result_chat = Waits.Wait20s_ElementLoaded(data["talk"]["result_chat"] + str(chat_content) + "')]")
-    PrintGreen(">> Send message success")
-    Commands.testcasepass("write_content")
-
     #attach clouddisk
     time.sleep(2)
     Commands.ClickElement(data["talk"]["attach_clouddisk"])
@@ -605,11 +597,22 @@ def write_content():
     PrintYellow("- Attach file PC")
     time.sleep(5)
 
+    Commands.InputEnterElement(data["talk"]["input_content"], chat_content)
+    PrintYellow("- Input content chat")
+
+    try:
+        Waits.Wait20s_ElementLoaded(data["talk"]["result_chat"] % str(chat_content))
+        PrintGreen(">> Send message success")
+        Commands.testcasepass("write_content")
+    except:
+        PrintRed(">> Send message fail")
+        Commands.testcasefail("write_content")
+
 def attach_clouddisk():
     Waits.Wait20s_ElementLoaded(data["talk"]["clouddisk_page"])
-    time.sleep(2)
+    time.sleep(3)
     try:
-        no_items = driver.find_element_by_xpath(data["talk"]["no_items"])
+        Commands.FindElement(data["talk"]["no_items"])
         PrintYellow("=> No file in Clouddisk to attach")
         Commands.ClickElement(data["talk"]["close_button"])
     except:
@@ -624,26 +627,32 @@ def attach_clouddisk():
 
 def srcoll_mess():
     count_list = Functions.GetListLength(data["talk"]["count_list"])
-    Commands.MoveToElement(data["talk"]["scroll_newmess"])
-    # scroll_newmess = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["scroll_newmess"])))
-    # ActionChains(driver).move_to_element(scroll_newmess).release().perform()
-    PrintYellow("- Scroll messenger")
-    time.sleep(2)
-    coutn_list1 = Functions.GetListLength(data["talk"]["count_list"])
+    if count_list > 40:
+        Commands.MoveToElement(data["talk"]["scroll_newmess"])
+        PrintYellow("- Scroll messenger")
+        time.sleep(2)
+        coutn_list1 = Functions.GetListLength(data["talk"]["count_list"])
 
-    if coutn_list1 > count_list:
-        PrintGreen("=> Scroll up to view older messages success")
+        if coutn_list1 > count_list:
+            PrintGreen("=> Scroll up to view older messages success")
+        else:
+            PrintRed("=> Scroll up to view older messages fail")
     else:
-        PrintRed("=> Scroll up to view older messages fail")
+        scroll_newmess = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["scroll_newmess"])))
+        target = driver.find_element_by_xpath("//*[@id='hanbiro_message_list_container']")
+        test = ActionChains(driver).click_and_hold(target)
+        time.sleep(2)
+        test.move_to_element(scroll_newmess).release().perform()
+        time.sleep(3)
+        PrintYellow("- Scroll messenger 123")
 
 def attach_clouddisk_whisper():
     Waits.Wait20s_ElementLoaded(data["talk"]["clouddisk_page"])
-    time.sleep(2)
+    time.sleep(3)
     try:
-        no_items = driver.find_element_by_xpath(data["talk"]["no_items"])
-        if no_items.is_displayed():
-            PrintYellow("=> No file in Clouddisk to attach")
-            Commands.ClickElement(data["talk"]["close_button"])
+        Commands.FindElement(data["talk"]["no_items"])
+        PrintYellow("=> No file in Clouddisk to attach")
+        Commands.ClickElement(data["talk"]["close_button"])
     except:
         count_file = Functions.GetListLength(data["talk"]["count_file"])
         if count_file > 2:
@@ -706,7 +715,18 @@ def send_whisper():
         PrintRed("=> Access whisper tab fail")
         Commands.testcasefail("access_whisper_page")
 
+def clock_out():
+    Commands.ClickElement("//div[contains(@class,'Pane1')]//button[@aria-label='delete']")
+    PrintYellow("- Clock out button")
+    Commands.Wait10s_ClickElement("//button/span[@class='MuiButton-label' and contains(.,'Clear And Logout')]")
+    time.sleep(2)
+    try:
+        Waits.Wait10s_ElementLoaded("//button/span[@class='MuiButton-label' and contains(.,'Sign In')]")
+        PrintGreen("=> Clock out success")
+    except WebDriverException:
+        PrintRed("=> Clock out fail")
+
 login()
 message()
 #whisper()
-
+#clock_out()

@@ -575,11 +575,11 @@ def send_mess():
             write_content()
         except:
             pass   
-        srcoll_mess()
-        # try:
-        #     srcoll_mess()
-        # except:
-        #     pass 
+        
+        try:
+            srcoll_mess()
+        except:
+            pass 
     except WebDriverException:
         PrintRed(">> Access page chat fail")
         Commands.testcasefail("access_message_page")
@@ -638,13 +638,13 @@ def srcoll_mess():
         else:
             PrintRed("=> Scroll up to view older messages fail")
     else:
-        scroll_newmess = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.XPATH, data["talk"]["scroll_newmess"])))
-        target = driver.find_element_by_xpath("//*[@id='hanbiro_message_list_container']")
-        test = ActionChains(driver).click_and_hold(target)
+        target = Waits.Wait20s_ElementLoaded(data["talk"]["scroll_bar"])
+        scroll_newmess = Waits.Wait20s_ElementLoaded(data["talk"]["scroll_newmess"])
         time.sleep(2)
-        test.move_to_element(scroll_newmess).release().perform()
-        time.sleep(3)
-        PrintYellow("- Scroll messenger 123")
+        hover_bar = ActionChains(driver).move_to_element(target).click_and_hold(target)
+        hover_bar.move_to_element(scroll_newmess).release().perform()
+        PrintYellow("- Scroll messenger")
+        time.sleep(2)
 
 def attach_clouddisk_whisper():
     Waits.Wait20s_ElementLoaded(data["talk"]["clouddisk_page"])
@@ -663,32 +663,34 @@ def attach_clouddisk_whisper():
         Commands.ClickElement(data["talk"]["send_file"][1])
         PrintYellow("=> Send attach file clouddisk")
             
+def whisper_page():
+    contact_search = Commands.ClickElement(data["talk"]["contact_search"])
+    actionChains = ActionChains(driver)
+    actionChains.context_click(contact_search).perform()
+    PrintYellow("- Right click")
+    Commands.Wait10s_ClickElement(data["talk"]["send_whisper"])
+    time.sleep(3)
+    PrintYellow("- Send whisper")
+    try:
+        Waits.Wait20s_ElementLoaded(data["talk"]["write_whisper"])
+        time.sleep(2)
+    except WebDriverException:
+        
+
+
+    return contact_search
+
 def whisper():
-    Commands.ClickElement(data["talk"]["org"])
-    Waits.Wait20s_ElementLoaded(data["talk"]["whisper"])
-    time.sleep(5)
+    contact_search = whisper_page()
 
-    Commands.InputEnterElement(data["talk"]["search_contact"], contact_org.lower())
-    time.sleep(2)
-
-    contact_search = Waits.Wait20s_ElementLoaded(data["talk"]["contact_search"]+ str(contact_org) +"')]")
-    if contact_search.is_displayed():
-        PrintGreen(">> Search user success")
-        time.sleep(3)
-        actionChains = ActionChains(driver)
-        actionChains.context_click(contact_search).perform()
-        PrintYellow("- Right click")
-
-        Commands.Wait10s_ClickElement(data["talk"]["send_whisper"])
-        time.sleep(3)
-        PrintYellow("- Send whisper")
+    if contact_search == True:
         send_whisper()
     else:
-        PrintRed(">> Search user fail")
+        pass
+
 
 def send_whisper():
-    Waits.Wait20s_ElementLoaded(data["talk"]["write_whisper"])
-    time.sleep(2)
+    
 
     Commands.InputElement(data["talk"]["input_whisper"], content_whisper)
     time.sleep(2)
@@ -728,5 +730,5 @@ def clock_out():
 
 login()
 message()
-#whisper()
+whisper()
 #clock_out()

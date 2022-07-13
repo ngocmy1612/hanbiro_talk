@@ -485,6 +485,7 @@
             "//button/span[text()='SEND']",
             "//button/span[text()='Apply']"
         ],
+        "scroll_bar": "//*[@id='hanbiro_message_list_container']//div[contains(@class,'simplebar-vertical')]/div[@class='simplebar-scrollbar']",
         "my_room": "//div[contains(@class,'Pane2')]//h6[text()='My Room']",
         "list_mess": "//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')]",
         "talk_msg": "//div[@class='simplebar-content']//div[@aria-label='grid']/div/div[%s]//p/span",

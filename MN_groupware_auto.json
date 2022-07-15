@@ -249,8 +249,8 @@
         "wait_bussiness": "//detail-project-react//div[@class='setting-project']//p[contains(.,'Type')]/following-sibling::div/strong[contains(.,'Bussiness')]",
         "add_leader": "//detail-project-react//div[@class='setting-project']//p/strong[contains(.,'Leader')]/following-sibling::a",
         "search_leader": "//*[starts-with(@id,'getUserProjectleaders0')]//input[@class='nav-search-input']",
-        "user1": "//ul[@class='dynatree-container']//li[2]",
-        "user2": "//ul[@class='dynatree-container']//li[3]",
+        "user1": "//ul[@class='dynatree-container']//li[2]/span/span[@class='dynatree-checkbox']",
+        "user2": "//ul[@class='dynatree-container']//li[3]/span/span[@class='dynatree-checkbox']",
         "button_add": "//*[starts-with(@id,'getUserProjectleaders0')]//h5[contains(.,'Selected List')]/following-sibling::div/a[@data-action='add']",
         "save_leader": "//*[starts-with(@id,'getUserProjectleaders0')]//div[contains(@class,'modal-footer')]/button[contains(.,'Save')]",
         "board": "//*[@id='ngw.projectnew.project']//li/a[contains(.,'Boards')]"
@@ -485,6 +485,9 @@
             "//button/span[text()='SEND']",
             "//button/span[text()='Apply']"
         ],
+        "out_but": "//div[contains(@class,'Pane1')]//button[@aria-label='delete']",
+        "sign_in_but": "//button/span[@class='MuiButton-label' and contains(.,'Sign In')]",
+        "clear_out": "//button/span[@class='MuiButton-label' and contains(.,'Clear And Logout')]",
         "scroll_bar": "//*[@id='hanbiro_message_list_container']//div[contains(@class,'simplebar-vertical')]/div[@class='simplebar-scrollbar']",
         "my_room": "//div[contains(@class,'Pane2')]//h6[text()='My Room']",
         "list_mess": "//div[@class='simplebar-content']//div[contains(@role,'rowgroup')]//div[contains(@class,'MuiListItem-button')]",

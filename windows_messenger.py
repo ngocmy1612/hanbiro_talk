@@ -41,11 +41,12 @@ class objects:
     testcase_fail = "Test case status: fail"
 
 #data
-attachment = current_path + "\\attachment\\background6.jpg"
-file_text = current_path + "\\attachment\\file_text.txt"
 domain_execution = "myngoc.hanbiro.net"
 contact_org = "automationtest1"
 password_talk = "automationtest1!"
+
+attachment = current_path + "\\attachment\\background6.jpg"
+file_text = current_path + "\\attachment\\file_text.txt"
 chat_content = "Hanbiro test messenger " + objects.date_time
 content_whisper = "Hanbiro test whisper " + objects.date_time
 
@@ -540,7 +541,6 @@ def message():
     except:
         PrintRed("=> Cannot access messenger tab")
         Commands.testcasefail("access_message_page")
-        pass
 
     try:
         searchuser()
@@ -585,17 +585,20 @@ def send_mess():
         Commands.testcasefail("access_message_page")
 
 def write_content():
-    #attach clouddisk
-    time.sleep(2)
-    Commands.ClickElement(data["talk"]["attach_clouddisk"])
-    PrintYellow("- Attach file Clouddisk")
-    attach_clouddisk()
-    time.sleep(3)
+    try:
+        Commands.Wait10s_ClickElement(data["talk"]["attach_clouddisk"])
+        PrintYellow("- Attach file Clouddisk")
+        attach_clouddisk()
+        time.sleep(3)
+    except WebDriverException:
+        PrintRed("=> Attach Clouddisk fail")
 
-    #attach PC
-    Commands.InputElement(data["talk"]["attach_pc"], attachment)
-    PrintYellow("- Attach file PC")
-    time.sleep(5)
+    try:
+        Commands.InputElement(data["talk"]["attach_pc"], attachment)
+        PrintYellow("- Attach file PC")
+        time.sleep(3)
+    except WebDriverException:
+        PrintRed("=> Attach PC fail")
 
     Commands.InputEnterElement(data["talk"]["input_content"], chat_content)
     PrintYellow("- Input content chat")
@@ -669,66 +672,69 @@ def whisper_page():
     actionChains.context_click(contact_search).perform()
     PrintYellow("- Right click")
     Commands.Wait10s_ClickElement(data["talk"]["send_whisper"])
-    time.sleep(3)
     PrintYellow("- Send whisper")
-    try:
-        Waits.Wait20s_ElementLoaded(data["talk"]["write_whisper"])
-        time.sleep(2)
-    except WebDriverException:
-        
-
-
+    time.sleep(2)
+    Waits.Wait20s_ElementLoaded(data["talk"]["write_whisper"])
+    time.sleep(2)
+    
     return contact_search
 
 def whisper():
-    contact_search = whisper_page()
+    try:
+        contact_search = whisper_page()
+    except:
+        contact_search = None
 
-    if contact_search == True:
+    if bool(contact_search) == True:
         send_whisper()
     else:
-        pass
-
+        PrintRed(">>> Don't show pop up write whisper")
 
 def send_whisper():
-    
-
     Commands.InputElement(data["talk"]["input_whisper"], content_whisper)
     time.sleep(2)
-    Commands.Wait10s_ClickElement(data["talk"]["clouddisk_button"])
-    PrintYellow("- Attach file Clouddisk")
-    attach_clouddisk_whisper()
-    time.sleep(2)
+    try:
+        Commands.Wait10s_ClickElement(data["talk"]["clouddisk_button"])
+        PrintYellow("- Attach file Clouddisk")
+        attach_clouddisk_whisper()
+        time.sleep(2)
+    except WebDriverException:
+        PrintRed("=> Attach Clouddisk fail")
 
-    Commands.InputElement(data["talk"]["attach_whisper"], file_text)
-    PrintYellow("- Attach file whisper")
+    try:
+        Commands.InputElement(data["talk"]["attach_whisper"], file_text)
+        PrintYellow("- Attach file whisper")
+    except WebDriverException:
+        PrintRed("=> Attach PC fail")
+
     Commands.Wait10s_ClickElement(data["talk"]["send_whis"])
     PrintYellow("- Send whisper")
     Commands.Wait10s_ClickElement(data["talk"]["close_whisper"])
     PrintYellow("- Close pop up write whisper")
     Commands.Wait10s_ClickElement(data["talk"]["access_whisper_page"])
     PrintYellow("- Access Whisper page")
-    time.sleep(2)
+    time.sleep(5)
 
     try:
-        driver.find_element_by_xpath(data["talk"]["whisper_page"])
+        Waits.Wait10s_ElementLoaded(data["talk"]["whisper_page"])
         PrintGreen("=> Access whisper tab success")
         Commands.testcasepass("access_whisper_page")
     except:
         PrintRed("=> Access whisper tab fail")
         Commands.testcasefail("access_whisper_page")
 
-def clock_out():
-    Commands.ClickElement("//div[contains(@class,'Pane1')]//button[@aria-label='delete']")
-    PrintYellow("- Clock out button")
-    Commands.Wait10s_ClickElement("//button/span[@class='MuiButton-label' and contains(.,'Clear And Logout')]")
+def log_out():
+    Commands.ClickElement(data["talk"]["out_but"])
+    PrintYellow("- Log out button")
+    Commands.Wait10s_ClickElement(data["talk"]["clear_out"])
     time.sleep(2)
     try:
-        Waits.Wait10s_ElementLoaded("//button/span[@class='MuiButton-label' and contains(.,'Sign In')]")
-        PrintGreen("=> Clock out success")
+        Waits.Wait10s_ElementLoaded(data["talk"]["sign_in_but"])
+        PrintGreen("=> Log out success")
     except WebDriverException:
-        PrintRed("=> Clock out fail")
+        PrintRed("=> Log out fail")
 
 login()
 message()
 whisper()
-#clock_out()
+log_out()

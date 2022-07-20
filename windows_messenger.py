@@ -528,25 +528,6 @@ def get_newest_mess():
             except WebDriverException:
                 PrintYellow("- Talk room")
 
-def message():
-    #access message tab
-    Commands.Wait10s_ClickElement(data["talk"]["room_list"])
-    time.sleep(3)
-    try:
-        Waits.Wait20s_ElementLoaded(data["talk"]["message_tab"])
-        PrintGreen("=> Access messenger tab")
-        Commands.testcasepass("access_message_page")
-        time.sleep(2)
-        get_newest_mess()
-    except:
-        PrintRed("=> Cannot access messenger tab")
-        Commands.testcasefail("access_message_page")
-
-    try:
-        searchuser()
-    except:
-        pass
-
 def searchuser():
     Commands.ClickElement(data["talk"]["org"])
     PrintYellow("- Access ORG")
@@ -556,15 +537,43 @@ def searchuser():
     time.sleep(2)
     PrintYellow("- Search myself")
     Commands.ClickElement(data["talk"]["contact_search"])
-    try:
-        Waits.Wait10s_ElementLoaded(data["talk"]["my_room"])
-        PrintGreen("=> Search user success")
-        Commands.testcasepass("message_search")
-        send_mess()
-    except:
-        PrintRed("=> Search user fail")
-        Commands.testcasefail("message_search")
+    Waits.Wait10s_ElementLoaded(data["talk"]["my_room"])
 
+def message():
+    #access message tab
+    Commands.Wait10s_ClickElement(data["talk"]["room_list"])
+    time.sleep(3)
+    
+    try:
+        Waits.Wait20s_ElementLoaded(data["talk"]["message_tab"])
+        PrintGreen("=> Access messenger tab")
+        message_tab = True
+    except WebDriverException:
+        PrintRed("=> Cannot access messenger tab")
+        message_tab = False
+
+    if message_tab == True:
+        try:
+            get_newest_mess()
+            PrintGreen("Define content of newest mess success")
+        except WebDriverException:
+            PrintRed("Define content of newest mess fail")
+
+    try:
+        searchuser()
+        PrintGreen("Search user success")
+        search_user = True
+    except WebDriverException:
+        PrintRed("Cannot find user in org tree")
+        search_user = False
+
+    if search_user == True:
+        try:
+            send_mess()
+            PrintGreen("Send msg success")
+        except WebDriverException:
+            PrintRed("Send msg fail")
+    
 def send_mess():
     try:
         Waits.Wait20s_ElementLoaded(data["talk"]["access_page_chat"])

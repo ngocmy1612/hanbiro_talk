@@ -1,3 +1,4 @@
+import re
 import time, sys, unittest, random, json, os, pyperclip, openpyxl
 from tracemalloc import stop
 from datetime import datetime
@@ -579,26 +580,37 @@ def send_mess():
         Waits.Wait20s_ElementLoaded(data["talk"]["access_page_chat"])
         time.sleep(2)
         PrintGreen(">> Access page chat success")
-        Commands.testcasepass("access_message_page")
-        try:
-            write_content()
-        except:
-            pass   
-        
-        try:
-            srcoll_mess()
-        except:
-            pass 
+        page_chat = True
     except WebDriverException:
         PrintRed(">> Access page chat fail")
-        Commands.testcasefail("access_message_page")
+        page_chat = False
+
+    if page_chat == True:
+        try:
+            write_content()
+            PrintGreen("Content is written success")
+        except:
+            PrintRed("Content is written fail")
+
+        try:
+            srcoll_mess()
+            PrintGreen("Scroll messenger success")
+        except:
+            PrintRed("Scroll messenger fail")
 
 def write_content():
+    send_msg_result = {
+        "pc_attachment": None,
+        "clouddisk_attachment": None,
+        "send_text_msg": None
+    }
+
     try:
         Commands.Wait10s_ClickElement(data["talk"]["attach_clouddisk"])
         PrintYellow("- Attach file Clouddisk")
         attach_clouddisk()
         time.sleep(3)
+        send_msg_result["clouddisk_attachment"] = True
     except WebDriverException:
         PrintRed("=> Attach Clouddisk fail")
 
@@ -606,19 +618,31 @@ def write_content():
         Commands.InputElement(data["talk"]["attach_pc"], attachment)
         PrintYellow("- Attach file PC")
         time.sleep(3)
+        send_msg_result["pc_attachment"] = True
     except WebDriverException:
         PrintRed("=> Attach PC fail")
 
-    Commands.InputEnterElement(data["talk"]["input_content"], chat_content)
-    PrintYellow("- Input content chat")
-
     try:
+        Commands.InputEnterElement(data["talk"]["input_content"], chat_content)
+        PrintYellow("- Input content chat")
         Waits.Wait20s_ElementLoaded(data["talk"]["result_chat"] % str(chat_content))
         PrintGreen(">> Send message success")
-        Commands.testcasepass("write_content")
+        send_msg_result["send_text_msg"] = True
     except:
         PrintRed(">> Send message fail")
-        Commands.testcasefail("write_content")
+
+    result_list = []
+    for talk_result in send_msg_result.keys():
+        result_list.append(send_msg_result[talk_result])
+
+    if None not in result_list:
+        write_msg = True
+        PrintGreen("Send msg complete")
+    else:
+        write_msg = False
+        PrintRed("Send msg uncomplete")
+
+    return write_msg
 
 def attach_clouddisk():
     Waits.Wait20s_ElementLoaded(data["talk"]["clouddisk_page"])
@@ -685,23 +709,24 @@ def whisper_page():
     time.sleep(2)
     Waits.Wait20s_ElementLoaded(data["talk"]["write_whisper"])
     time.sleep(2)
-    
-    return contact_search
 
 def whisper():
     try:
-        contact_search = whisper_page()
+        whisper_page()
+        PrintGreen("=> Write whisper popup is display")
+        whisper_tab = True
     except:
-        contact_search = None
+        PrintRed("=> Don't show pop up write whisper")
+        whisper_tab = False
 
-    if bool(contact_search) == True:
-        send_whisper()
-    else:
-        PrintRed(">>> Don't show pop up write whisper")
+    if whisper_tab == True:
+        try:
+            send_whisper()
+            PrintGreen("Send whisper success")
+        except WebDriverException:
+            PrintRed("Send whisper fail")
 
 def send_whisper():
-    Commands.InputElement(data["talk"]["input_whisper"], content_whisper)
-    time.sleep(2)
     try:
         Commands.Wait10s_ClickElement(data["talk"]["clouddisk_button"])
         PrintYellow("- Attach file Clouddisk")
@@ -716,15 +741,21 @@ def send_whisper():
     except WebDriverException:
         PrintRed("=> Attach PC fail")
 
-    Commands.Wait10s_ClickElement(data["talk"]["send_whis"])
-    PrintYellow("- Send whisper")
-    Commands.Wait10s_ClickElement(data["talk"]["close_whisper"])
-    PrintYellow("- Close pop up write whisper")
-    Commands.Wait10s_ClickElement(data["talk"]["access_whisper_page"])
-    PrintYellow("- Access Whisper page")
-    time.sleep(5)
+    try:
+        Commands.InputElement(data["talk"]["input_whisper"], content_whisper)
+        time.sleep(2)
+        Commands.Wait10s_ClickElement(data["talk"]["send_whis"])
+        PrintYellow("- Send whisper")
+        Commands.Wait10s_ClickElement(data["talk"]["close_whisper"])
+        PrintYellow("- Close pop up write whisper")
+    except WebDriverException:
+        PrintRed
+    
 
     try:
+        Commands.Wait10s_ClickElement(data["talk"]["access_whisper_page"])
+        PrintYellow("- Access Whisper page")
+        time.sleep(2)
         Waits.Wait10s_ElementLoaded(data["talk"]["whisper_page"])
         PrintGreen("=> Access whisper tab success")
         Commands.testcasepass("access_whisper_page")

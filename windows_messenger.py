@@ -42,9 +42,9 @@ class objects:
     testcase_fail = "Test case status: fail"
 
 #data
-domain_execution = "myngoc.hanbiro.net"
-contact_org = "automationtest1"
-password_talk = "automationtest1!"
+domain_execution = "mail3.dooreit.co.kr"
+contact_org = "hanbiro"
+password_talk = "hanbiro123!@#"
 
 attachment = current_path + "\\attachment\\background6.jpg"
 file_text = current_path + "\\attachment\\file_text.txt"
@@ -482,16 +482,18 @@ def login():
     try:
         Waits.Wait20s_ElementLoaded(data["talk"]["access_page"])
         PrintGreen("=> Login success")
-        Commands.testcasepass("login")
+        login_result = True
     except:
         PrintRed("=> Login fail")
-        Commands.testcasefail("login")
+        login_result = False
+
+    return login_result
 
 def get_newest_mess():
     list_mess = Functions.GetListLength(data["talk"]["list_mess"])
 
     if list_mess == 0:
-        PrintYellow("=> List messenger empty")
+        PrintGreen("=> List messenger empty")
     else:
         msg_list = []
         i = 0
@@ -505,18 +507,18 @@ def get_newest_mess():
         for msg in msg_list:
             split_smg = msg.split(".")[-1]
             if split_smg in list_file:
-                PrintYellow(">>> Msg is image -> cannot define")
+                PrintGreen(">>> Msg is image -> cannot define")
             elif msg == "[EMOTICON]":
-                PrintYellow(">>> Msg is emoticon -> cannot define")
+                PrintGreen(">>> Msg is emoticon -> cannot define")
             else:
-                PrintYellow(">>> Msg is text")
+                PrintGreen(">>> Msg is text")
                 msg_text_list.append(msg)
 
         for target_msg in msg_text_list:
             target_position = msg_list.index(target_msg) + 1
             try:
                 Commands.ClickElement(data["talk"]["talk_user"] % str(target_position))
-                PrintYellow("- Talk user")
+                PrintGreen("- Talk user")
                 newest_content = Functions.GetElementText(data["talk"]["newest_mess_content"] % str(target_position))
                 time.sleep(3)
                 try:
@@ -527,16 +529,16 @@ def get_newest_mess():
 
                 break
             except WebDriverException:
-                PrintYellow("- Talk room")
+                PrintGreen("- Talk room")
 
 def searchuser():
     Commands.ClickElement(data["talk"]["org"])
-    PrintYellow("- Access ORG")
+    PrintGreen("- Access ORG")
     Waits.Wait20s_ElementLoaded(data["talk"]["mess_page"])
     time.sleep(3)
     Commands.InputEnterElement(data["talk"]["search_contact"], contact_org)
     time.sleep(2)
-    PrintYellow("- Search myself")
+    PrintGreen("- Search myself")
     Commands.ClickElement(data["talk"]["contact_search"])
     Waits.Wait10s_ElementLoaded(data["talk"]["my_room"])
 
@@ -607,7 +609,7 @@ def write_content():
 
     try:
         Commands.Wait10s_ClickElement(data["talk"]["attach_clouddisk"])
-        PrintYellow("- Attach file Clouddisk")
+        PrintGreen("- Attach file Clouddisk")
         attach_clouddisk()
         time.sleep(3)
         send_msg_result["clouddisk_attachment"] = True
@@ -616,7 +618,7 @@ def write_content():
 
     try:
         Commands.InputElement(data["talk"]["attach_pc"], attachment)
-        PrintYellow("- Attach file PC")
+        PrintGreen("- Attach file PC")
         time.sleep(3)
         send_msg_result["pc_attachment"] = True
     except WebDriverException:
@@ -624,7 +626,7 @@ def write_content():
 
     try:
         Commands.InputEnterElement(data["talk"]["input_content"], chat_content)
-        PrintYellow("- Input content chat")
+        PrintGreen("- Input content chat")
         Waits.Wait20s_ElementLoaded(data["talk"]["result_chat"] % str(chat_content))
         PrintGreen(">> Send message success")
         send_msg_result["send_text_msg"] = True
@@ -649,23 +651,23 @@ def attach_clouddisk():
     time.sleep(3)
     try:
         Commands.FindElement(data["talk"]["no_items"])
-        PrintYellow("=> No file in Clouddisk to attach")
+        PrintGreen("=> No file in Clouddisk to attach")
         Commands.ClickElement(data["talk"]["close_button"])
     except:
         count_file = Functions.GetListLength(data["talk"]["count_file"])
         if count_file > 2:
             Commands.ClickElement(data["talk"]["file1"])
             Commands.ClickElement(data["talk"]["file2"])
-            PrintYellow("- Select file")
+            PrintGreen("- Select file")
             time.sleep(2)
         Commands.ClickElement(data["talk"]["send_file"][0])
-        PrintYellow("=> Send attach file clouddisk")
+        PrintGreen("=> Send attach file clouddisk")
 
 def srcoll_mess():
     count_list = Functions.GetListLength(data["talk"]["count_list"])
     if count_list > 40:
         Commands.MoveToElement(data["talk"]["scroll_newmess"])
-        PrintYellow("- Scroll messenger")
+        PrintGreen("- Scroll messenger")
         time.sleep(2)
         coutn_list1 = Functions.GetListLength(data["talk"]["count_list"])
 
@@ -679,7 +681,7 @@ def srcoll_mess():
         time.sleep(2)
         hover_bar = ActionChains(driver).move_to_element(target).click_and_hold(target)
         hover_bar.move_to_element(scroll_newmess).release().perform()
-        PrintYellow("- Scroll messenger")
+        PrintGreen("- Scroll messenger")
         time.sleep(2)
 
 def attach_clouddisk_whisper():
@@ -687,25 +689,25 @@ def attach_clouddisk_whisper():
     time.sleep(3)
     try:
         Commands.FindElement(data["talk"]["no_items"])
-        PrintYellow("=> No file in Clouddisk to attach")
+        PrintGreen("=> No file in Clouddisk to attach")
         Commands.ClickElement(data["talk"]["close_button"])
     except:
         count_file = Functions.GetListLength(data["talk"]["count_file"])
         if count_file > 2:
             Commands.ClickElement(data["talk"]["file1"])
             Commands.ClickElement(data["talk"]["file2"])
-            PrintYellow("- Select file")
+            PrintGreen("- Select file")
             time.sleep(2)
         Commands.ClickElement(data["talk"]["send_file"][1])
-        PrintYellow("=> Send attach file clouddisk")
+        PrintGreen("=> Send attach file clouddisk")
             
 def whisper_page():
     contact_search = Commands.ClickElement(data["talk"]["contact_search"])
     actionChains = ActionChains(driver)
     actionChains.context_click(contact_search).perform()
-    PrintYellow("- Right click")
+    PrintGreen("- Right click")
     Commands.Wait10s_ClickElement(data["talk"]["send_whisper"])
-    PrintYellow("- Send whisper")
+    PrintGreen("- Send whisper")
     time.sleep(2)
     Waits.Wait20s_ElementLoaded(data["talk"]["write_whisper"])
     time.sleep(2)
@@ -727,17 +729,26 @@ def whisper():
             PrintRed("Send whisper fail")
 
 def send_whisper():
+    send_whis_result = {
+        "pc_attachment": None,
+        "clouddisk_attachment": None,
+        "send_text_whis": None,
+        "access_whis_tab": None
+    }
+
     try:
         Commands.Wait10s_ClickElement(data["talk"]["clouddisk_button"])
-        PrintYellow("- Attach file Clouddisk")
+        PrintGreen("- Attach file Clouddisk")
         attach_clouddisk_whisper()
         time.sleep(2)
+        send_whis_result["clouddisk_attachment"] = True
     except WebDriverException:
         PrintRed("=> Attach Clouddisk fail")
 
     try:
         Commands.InputElement(data["talk"]["attach_whisper"], file_text)
-        PrintYellow("- Attach file whisper")
+        PrintGreen("- Attach file whisper")
+        send_whis_result["pc_attachment"] = True
     except WebDriverException:
         PrintRed("=> Attach PC fail")
 
@@ -745,27 +756,39 @@ def send_whisper():
         Commands.InputElement(data["talk"]["input_whisper"], content_whisper)
         time.sleep(2)
         Commands.Wait10s_ClickElement(data["talk"]["send_whis"])
-        PrintYellow("- Send whisper")
-        Commands.Wait10s_ClickElement(data["talk"]["close_whisper"])
-        PrintYellow("- Close pop up write whisper")
+        PrintGreen("Send whisper")
+        send_whis_result["send_text_whis"] = True
     except WebDriverException:
-        PrintRed
+        PrintRed("Send whisper fail")
     
-
     try:
+        Commands.Wait10s_ClickElement(data["talk"]["close_whisper"])
+        PrintGreen("- Close pop up write whisper")
         Commands.Wait10s_ClickElement(data["talk"]["access_whisper_page"])
-        PrintYellow("- Access Whisper page")
+        PrintGreen("- Access Whisper page")
         time.sleep(2)
         Waits.Wait10s_ElementLoaded(data["talk"]["whisper_page"])
         PrintGreen("=> Access whisper tab success")
-        Commands.testcasepass("access_whisper_page")
+        send_whis_result["access_whis_tab"] = True
     except:
         PrintRed("=> Access whisper tab fail")
-        Commands.testcasefail("access_whisper_page")
+
+    whis_list = []
+    for whis_result in send_whis_result.keys():
+        whis_list.append(send_whis_result[whis_result])
+
+    if None not in whis_list:
+        write_whis = True
+        PrintGreen("Write whisper complete")
+    else:
+        write_whis = False
+        PrintRed("Write whisper uncomplete")
+    
+    return write_whis
 
 def log_out():
     Commands.ClickElement(data["talk"]["out_but"])
-    PrintYellow("- Log out button")
+    PrintGreen("- Log out button")
     Commands.Wait10s_ClickElement(data["talk"]["clear_out"])
     time.sleep(2)
     try:
@@ -774,7 +797,12 @@ def log_out():
     except WebDriverException:
         PrintRed("=> Log out fail")
 
-login()
-message()
-whisper()
-log_out()
+def run_talk():
+    login_result = login()
+    if bool(login_result) == True:
+        message()
+        whisper()
+        log_out()
+
+
+run_talk()

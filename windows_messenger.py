@@ -42,9 +42,9 @@ class objects:
     testcase_fail = "Test case status: fail"
 
 #data
-domain_execution = "mail3.dooreit.co.kr"
-contact_org = "hanbiro"
-password_talk = "hanbiro123!@#"
+domain_execution = "myngoc.hanbiro.net"
+contact_org = "automationtest"
+password_talk = "automationtest1!"
 
 attachment = current_path + "\\attachment\\background6.jpg"
 file_text = current_path + "\\attachment\\file_text.txt"
